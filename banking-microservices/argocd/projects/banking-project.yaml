@@ -6,7 +6,8 @@ metadata:
 spec:
   description: Banking Microservices Project
   sourceRepos:
-    - https://github.com/yourusername/banking-microservices
+    - https://github.com/zoumana001/GITOPS_PROJECT_BANKING.git
+    - "*"    # allow all repos (for helm charts from external repos)
   destinations:
     - namespace: banking
       server: https://kubernetes.default.svc
@@ -16,6 +17,11 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: ingress-nginx
       server: https://kubernetes.default.svc
+    - namespace: "*"
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
     - group: '*'
       kind: '*'
