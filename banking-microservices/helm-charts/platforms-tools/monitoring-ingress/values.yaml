@@ -1,0 +1,15 @@
+clusterIssuer: letsencrypt-prod
+
+grafana:
+  enabled: true
+  host: grafana.zoumanas.com
+  serviceName: prometheus-stack-grafana
+  servicePort: 80
+  tlsSecret: grafana-tls
+
+prometheus:
+  enabled: true
+  host: prometheus.zoumanas.com
+  serviceName: prometheus-stack-kube-prom-prometheus
+  servicePort: 9090
+  tlsSecret: prometheus-tls

@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-ingress
+  namespace: monitoring
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  {{- if .Values.grafana.enabled }}
+  - hosts:
+    - {{ .Values.grafana.host }}
+    secretName: {{ .Values.grafana.tlsSecret }}
+  {{- end }}
+  {{- if .Values.prometheus.enabled }}
+  - hosts:
+    - {{ .Values.prometheus.host }}
+    secretName: {{ .Values.prometheus.tlsSecret }}
+  {{- end }}
+  rules:
+  {{- if .Values.grafana.enabled }}
+  - host: {{ .Values.grafana.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.grafana.serviceName }}
+            port:
+              number: {{ .Values.grafana.servicePort }}
+  {{- end }}
+  {{- if .Values.prometheus.enabled }}
+  - host: {{ .Values.prometheus.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.prometheus.serviceName }}
+            port:
+              number: {{ .Values.prometheus.servicePort }}
+  {{- end }}

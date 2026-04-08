@@ -1,0 +1,4 @@
+apiVersion: v2
+name: monitoring-ingress
+description: Ingress for Grafana and Prometheus
+version: 1.0.0
