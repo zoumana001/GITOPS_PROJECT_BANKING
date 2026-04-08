@@ -21,7 +21,7 @@ transactionService:
     repository: 064032723992.dkr.ecr.us-east-1.amazonaws.com/transaction-service
     tag: "24"
   replicas: 2
-  port: 8080
+  port: 8081
 
 transferService:
   name: transfer-service
@@ -29,7 +29,7 @@ transferService:
     repository: 064032723992.dkr.ecr.us-east-1.amazonaws.com/transfer-service
     tag: "24"
   replicas: 2
-  port: 8080
+  port: 8082
 
 ingress:
   enabled: true
