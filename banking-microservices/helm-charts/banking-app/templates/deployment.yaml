@@ -33,14 +33,16 @@ spec:
             memory: 512Mi
         livenessProbe:
           httpGet:
-            path: /api/{{ $name | lower }}/health
+            path: /actuator/health
             port: {{ $svc.port }}
-          initialDelaySeconds: 30
-          periodSeconds: 10
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 5
         readinessProbe:
           httpGet:
-            path: /api/{{ $name | lower }}/health
+            path: /actuator/health
             port: {{ $svc.port }}
-          initialDelaySeconds: 15
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          failureThreshold: 5
 {{- end }}
