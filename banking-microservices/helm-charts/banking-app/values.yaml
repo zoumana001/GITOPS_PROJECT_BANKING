@@ -33,6 +33,7 @@ transferService:
 
 ingress:
   enabled: true
-  host: banking.zoumanas.com
-  tlsSecret: banking-tls
+  className: nginx
+  host: banking.zoumanas.com  # Your real domain
   clusterIssuer: letsencrypt-prod
+  tlsSecret: banking-app-tls
