@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,9 +6,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: banking
-    environment: {{ .Values.environment }}
+    environment: "{{ .Values.environment }}"
 data:
-  APP_ENV: {{ .Values.environment }}
+  APP_ENV: "{{ .Values.environment }}"
   ACCOUNT_SERVICE_URL: "http://account-service:80"
   TRANSACTION_SERVICE_URL: "http://transaction-service:80"
   TRANSFER_SERVICE_URL: "http://transfer-service:80"

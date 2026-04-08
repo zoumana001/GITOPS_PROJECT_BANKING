@@ -1,3 +1,5 @@
+environment: "production"
+
 accountService:
   name: account-service
   image:
