@@ -12,6 +12,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      skipCrds: true            # skip CRDs - already installed manually
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -21,9 +22,11 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true    # add this line - fixes CRD annotation limit
+      - ServerSideApply=true
+      - Replace=true
   ignoreDifferences:
     - group: apiextensions.k8s.io
       kind: CustomResourceDefinition
       jsonPointers:
         - /metadata/annotations
+        - /status
