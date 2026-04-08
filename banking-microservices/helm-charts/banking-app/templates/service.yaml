@@ -1,0 +1,14 @@
+{{- range $name, $svc := (dict "accountService" .Values.accountService "transactionService" .Values.transactionService "transferService" .Values.transferService) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $svc.name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  selector:
+    app: {{ $svc.name }}
+  ports:
+  - port: 80
+    targetPort: {{ $svc.port }}
+{{- end }}

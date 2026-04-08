@@ -1,0 +1,36 @@
+accountService:
+  name: account-service
+  image:
+    repository: 064032723992.dkr.ecr.us-east-1.amazonaws.com/account-service
+    tag: "24"
+  replicas: 2
+  port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+transactionService:
+  name: transaction-service
+  image:
+    repository: 064032723992.dkr.ecr.us-east-1.amazonaws.com/transaction-service
+    tag: "24"
+  replicas: 2
+  port: 8080
+
+transferService:
+  name: transfer-service
+  image:
+    repository: 064032723992.dkr.ecr.us-east-1.amazonaws.com/transfer-service
+    tag: "24"
+  replicas: 2
+  port: 8080
+
+ingress:
+  enabled: true
+  host: banking.zoumanas.com
+  tlsSecret: banking-tls
+  clusterIssuer: letsencrypt-prod

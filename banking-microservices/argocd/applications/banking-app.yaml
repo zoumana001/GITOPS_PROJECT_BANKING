@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: banking-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/zoumana001/GITOPS_PROJECT_BANKING.git
+    targetRevision: main
+    path: banking-project/banking-microservices/helm-charts/banking-app
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: banking
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      

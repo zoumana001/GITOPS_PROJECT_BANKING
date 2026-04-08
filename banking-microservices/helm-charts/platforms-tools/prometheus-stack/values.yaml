@@ -1,0 +1,28 @@
+kube-prometheus-stack:
+  grafana:
+    adminPassword: admin123
+    service:
+      type: LoadBalancer
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            folder: Banking
+            type: file
+            options:
+              path: /var/lib/grafana/dashboards/default
+  prometheus:
+    service:
+      type: LoadBalancer
+    prometheusSpec:
+      retention: 15d
+      resources:
+        requests:
+          memory: 512Mi
+          cpu: 250m
+        limits:
+          memory: 1Gi
+          cpu: 500m
+  alertmanager:
+    enabled: true

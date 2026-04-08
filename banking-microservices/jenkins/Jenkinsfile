@@ -1,0 +1,156 @@
+pipeline {
+    agent any
+
+    environment {
+        ECR_REGISTRY = "064032723992.dkr.ecr.us-east-1.amazonaws.com"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        AWS_REGION = "us-east-1"
+        SCANNER_HOME = tool 'sonar-scanner'
+        JAVA_HOME = '/usr/lib/jvm/java-21-openjdk-amd64'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+    }
+    
+    tools {
+        jdk 'jdk21'
+        maven 'maven'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/zoumana001/GITOPS_PROJECT_BANKING.git'
+            }
+        }
+        
+        stage('Gitleaks scan') {
+            steps {
+                sh 'gitleaks detect --report-format json --report-path report.json'
+            }
+        }
+        
+        stage('Build & Test') {
+            steps {
+                script {
+                    def services = ['account-service', 'transaction-service', 'transfer-service']
+
+                    for (s in services) {
+                        dir("banking-project/banking-microservices/services/${s}") {
+                            sh 'mvn clean package -DskipTests'
+                            sh 'mvn test'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Sonar Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    script {
+                        def services = ['account-service', 'transaction-service', 'transfer-service']
+
+                        for (s in services) {
+                            dir("services/${s}") {
+                                sh """
+                                \$SCANNER_HOME/bin/sonar-scanner \
+                                -Dsonar.projectKey=${s} \
+                                -Dsonar.projectName=${s} \
+                                -Dsonar.sources=. \
+                                -Dsonar.java.binaries=target
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage("Quality Gate") {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                    
+                    timeout(time: 5, unit: 'MINUTES') {
+                        def services = ['account-service', 'transaction-service', 'transfer-service']
+                        
+                        for (s in services) {
+                            dir("services/${s}") {
+                                waitForQualityGate abortPipeline: true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    dir('banking-project/banking-microservices') {
+                        sh """
+                            docker build -t account-service:${IMAGE_TAG} ./services/account-service
+                            docker build -t transaction-service:${IMAGE_TAG} ./services/transaction-service
+                            docker build -t transfer-service:${IMAGE_TAG} ./services/transfer-service
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    dir('banking-project/banking-microservices') {
+                        sh """
+                            aws ecr get-login-password --region ${AWS_REGION} | \
+                            docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+                            docker tag account-service:${IMAGE_TAG} ${ECR_REGISTRY}/account-service:${IMAGE_TAG}
+                            docker tag transaction-service:${IMAGE_TAG} ${ECR_REGISTRY}/transaction-service:${IMAGE_TAG}
+                            docker tag transfer-service:${IMAGE_TAG} ${ECR_REGISTRY}/transfer-service:${IMAGE_TAG}
+
+                            docker push ${ECR_REGISTRY}/account-service:${IMAGE_TAG}
+                            docker push ${ECR_REGISTRY}/transaction-service:${IMAGE_TAG}
+                            docker push ${ECR_REGISTRY}/transfer-service:${IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+        }
+    
+        stage('Update Helm Values') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'git-credentials',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASSWORD'
+                )]) {
+                    dir('banking-project/banking-microservices') {
+                        sh """
+                            sed -i 's/tag:.*/tag: "${IMAGE_TAG}"/' helm-charts/banking-app/values.yaml
+                            git config user.email "jenkins@banking.com"
+                            git config user.name "Jenkins"
+                            git add helm-charts/banking-app/values.yaml
+                            git commit -m "Update image tag to ${IMAGE_TAG}"
+                            git push https://${GIT_USER}:${GIT_PASSWORD}@github.com/zoumana001/GITOPS_PROJECT_BANKING.git main
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded! ArgoCD will sync automatically.'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}

@@ -1,0 +1,5 @@
+aws_region      = "us-east-1"
+cluster_name    = "banking-eks-cluster"
+cluster_version = "1.30"
+environment     = "production"
+vpc_cidr        = "10.0.0.0/16"
