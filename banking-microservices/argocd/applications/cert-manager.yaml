@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/zoumana001/GITOPS_PROJECT_BANKING.git
     targetRevision: main
-    path: banking-project/banking-microservices/helm-charts/platforms-tools/cert-manager
+    path: banking-microservices/helm-charts/platforms-tools/cert-manager
     helm:
       valueFiles:
         - values.yaml
