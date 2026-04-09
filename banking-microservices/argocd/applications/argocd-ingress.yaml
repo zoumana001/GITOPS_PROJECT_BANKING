@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-ingress
+  namespace: argocd
+spec:
+  project: banking
+  source:
+    repoURL: https://github.com/zoumana001/GITOPS_PROJECT_BANKING.git
+    targetRevision: main
+    path: banking-microservices/helm-charts/platforms-tools/argocd-ingress
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

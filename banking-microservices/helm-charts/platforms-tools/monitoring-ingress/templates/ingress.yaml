@@ -44,3 +44,15 @@ spec:
             port:
               number: {{ .Values.prometheus.servicePort }}
   {{- end }}
+   {{- if .Values.argocd.enabled }}
+  - host: {{ .Values.argocd.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.argocd.serviceName }}
+            port:
+              number: {{ .Values.argocd.servicePort }}
+  {{- end }}

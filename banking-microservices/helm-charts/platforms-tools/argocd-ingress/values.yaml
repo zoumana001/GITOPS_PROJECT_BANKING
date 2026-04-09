@@ -1,0 +1,3 @@
+clusterIssuer: letsencrypt-prod
+host: argocd.zoumanas.com
+tlsSecret: argocd-tls

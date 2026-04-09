@@ -13,3 +13,10 @@ prometheus:
   serviceName: prometheus-stack-kube-prom-prometheus
   servicePort: 9090
   tlsSecret: prometheus-tls
+
+argocd:
+  enabled: true
+  host: argocd.zoumanas.com
+  serviceName: argocd-server
+  servicePort: 80
+  tlsSecret: argocd-tls
