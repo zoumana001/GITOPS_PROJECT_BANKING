@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/zoumana001/GITOPS_PROJECT_BANKING.git
     targetRevision: main
-    path: banking-project/banking-microservices/helm-charts/platforms-tools/monitoring-ingress
+    path: banking-microservices/helm-charts/platforms-tools/monitoring-ingress
     helm:
       valueFiles:
         - values.yaml
